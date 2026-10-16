@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>考研冲刺计划</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 0;
+    min-height: 100vh;
+  }
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--primary), #1d4ed8);
+    color: #fff;
+    padding: 24px 20px;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.85; }
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .countdown-item {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px 16px;
+    min-width: 64px;
+  }
+  .countdown-num { font-size: 28px; font-weight: 700; }
+  .countdown-label { font-size: 11px; opacity: 0.8; }
+
+  /* Section */
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  /* Phase Timeline */
+  .phase {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .phase:last-child { margin-bottom: 0; }
+  .phase-dot {
+    width: 32px;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .phase-dot::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .phase-dot::after {
+    content: '';
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    margin-top: 4px;
+  }
+  .phase:last-child .phase-dot::after { display: none; }
+  .phase-1 .phase-dot::before { background: var(--orange); }
+  .phase-2 .phase-dot::before { background: var(--primary); }
+  .phase-3 .phase-dot::before { background: var(--green); }
+  .phase-content { flex: 1; padding-bottom: 8px; }
+  .phase-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .phase-date { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .phase-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 12px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+  .tab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* Checklist */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .check-item:active { transform: scale(0.98); }
+  .check-item.checked {
+    background: var(--green-light);
+    border-color: var(--green);
+  }
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .check-item.checked .check-box {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .check-box svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.2s; }
+  .check-item.checked .check-box svg { opacity: 1; }
+  .check-label { font-size: 13px; flex: 1; }
+  .check-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .tag-diagnose { background: var(--orange-light); color: var(--orange); }
+  .tag-train { background: var(--primary-light); color: var(--primary); }
+  .tag-mock { background: var(--green-light); color: var(--green); }
+
+  /* Progress bar */
+  .progress-wrap { margin-top: 12px; }
+  .progress-bar-bg {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    background: linear-gradient(90deg, var(--primary), var(--green));
+  }
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* Schedule */
+  .schedule-group { margin-bottom: 12px; }
+  .schedule-group:last-child { margin-bottom: 0; }
+  .schedule-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .schedule-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    gap: 12px;
+  }
+  .schedule-row:last-child { margin-bottom: 0; }
+  .schedule-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    min-width: 90px;
+  }
+  .schedule-subject { font-size: 13px; }
+
+  /* Tips */
+  .tip-card {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-left: 3px solid;
+  }
+  .tip-card:last-child { margin-bottom: 0; }
+  .tip-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .tip-list { font-size: 12px; color: var(--text-muted); line-height: 1.8; padding-left: 16px; }
+
+  /* Motivation */
+  .motivation {
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Reset button */
+  .reset-btn {
+    display: block;
+    margin: 16px auto;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .reset-btn:active { background: var(--bg); }
+
+  /* Tab content */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>2027 考研冲刺计划</h1>
+    <p>考试日期：2026年12月19-20日</p>
+    <div class="countdown">
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-days">--</div>
+        <div class="countdown-label">天</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-weeks">--</div>
+        <div class="countdown-label">周</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-hours">--</div>
+        <div class="countdown-label">可用学时</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase Timeline -->
+  <div class="section">
+    <div class="section-title">三阶段规划</div>
+    <div class="card">
+      <div class="phase phase-1">
+        <div class="phase-dot"></div>
+        <div class="phase-content">
+          <div class="phase-name">阶段一：基础诊断</div>
+          <div class="phase-date">10/16 — 11/1（2.5周）</div>
+          <div class="phase-desc">完成第1-2套真题和英语，不限时，重点分析题型分布，建立错题本</div>
+        </div>
+      </div>
+      <div class="phase phase-2">
+        <div class="phase-dot"></div>
+        <div class="phase-content">
+          <div class="phase-name">阶段二：强化突破</div>
+          <div class="phase-date">11/2 — 11/29（4周）</div>
+          <div class="phase-desc">完成第3-7套，逐步限时训练，攻克薄弱科目，整理错题</div>
+        </div>
+      </div>
+      <div class="phase phase-3">
+        <div class="phase-dot"></div>
+        <div class="phase-content">
+          <div class="phase-name">阶段三：冲刺模考</div>
+          <div class="phase-date">11/30 — 12/18（2.5周）</div>
+          <div class="phase-desc">完成第8-10套，严格限时模考，背诵重点，调整状态</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs: 真题 / 英语 / 日程 / 建议 -->
+  <div class="section">
+    <div class="tabs">
+      <button class="tab active" data-tab="zhenti">真题</button>
+      <button class="tab" data-tab="english">英语</button>
+      <button class="tab" data-tab="schedule">日程</button>
+      <button class="tab" data-tab="tips">建议</button>
+    </div>
+
+    <!-- 真题 Tab -->
+    <div class="tab-content active" id="tab-zhenti">
+      <div class="card">
+        <div class="checklist" id="zhenti-list"></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="zhenti-bar" style="width:0%"></div></div>
+          <div class="progress-text" id="zhenti-text">0 / 10 已完成</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 英语 Tab -->
+    <div class="tab-content" id="tab-english">
+      <div class="card">
+        <div class="checklist" id="english-list"></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="english-bar" style="width:0%"></div></div>
+          <div class="progress-text" id="english-text">0 / 10 已完成</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 日程 Tab -->
+    <div class="tab-content" id="tab-schedule">
+      <div class="card">
+        <div class="schedule-group">
+          <div class="schedule-label">工作日（周一至周五）</div>
+          <div class="schedule-row"><span class="schedule-time">19:00-20:00</span><span class="schedule-subject">政治（选择题/知识点）</span></div>
+          <div class="schedule-row"><span class="schedule-time">20:15-21:15</span><span class="schedule-subject">英语（阅读/词汇）</span></div>
+          <div class="schedule-row"><span class="schedule-time">21:30-22:30</span><span class="schedule-subject">专业课（套题/背诵）</span></div>
+        </div>
+        <div class="schedule-group">
+          <div class="schedule-label">周末（周六、周日）</div>
+          <div class="schedule-row"><span class="schedule-time">8:30-11:30</span><span class="schedule-subject">套题模拟 / 专业课</span></div>
+          <div class="schedule-row"><span class="schedule-time">14:00-17:00</span><span class="schedule-subject">英语套题 / 阅读精读</span></div>
+          <div class="schedule-row"><span class="schedule-time">19:00-21:00</span><span class="schedule-subject">错题回顾 / 薄弱点补强</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 建议 Tab -->
+    <div class="tab-content" id="tab-tips">
+      <div class="card">
+        <div class="tip-card" style="border-color: var(--orange);">
+          <div class="tip-title">政治策略</div>
+          <ul class="tip-list">
+            <li>选择题是拉分关键，每天刷30题保持手感</li>
+            <li>最后2周集中背诵大题（肖四肖八）</li>
+            <li>关注时政热点，结合知识点理解记忆</li>
+          </ul>
+        </div>
+        <div class="tip-card" style="border-color: var(--primary);">
+          <div class="tip-title">英语策略</div>
+          <ul class="tip-list">
+            <li>阅读理解占40%，精读每篇真题文章</li>
+            <li>作文提前准备3-5个万能模板并练习</li>
+            <li>每天背50个高频词汇，坚持到考前</li>
+          </ul>
+        </div>
+        <div class="tip-card" style="border-color: var(--green);">
+          <div class="tip-title">专业课策略</div>
+          <ul class="tip-list">
+            <li>真题重复率高，重点研究近5年考点</li>
+            <li>建立知识框架图，串联各章考点</li>
+            <li>论述题练习答题逻辑，控制字数和排版</li>
+          </ul>
+        </div>
+        <div class="tip-card" style="border-color: #8b5cf6;">
+          <div class="tip-title">状态管理</div>
+          <ul class="tip-list">
+            <li>保证7小时睡眠，不要熬夜复习</li>
+            <li>每周留半天彻底休息，防止倦怠</li>
+            <li>考前一周调整作息与考试时间同步</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Motivation -->
+  <div class="motivation" id="motivation">坚持就是胜利，上岸在即！</div>
+
+  <!-- Reset -->
+  <button class="reset-btn" id="reset-btn">重置所有进度</button>
+</div>
+
+<script>
+(function() {
+  // Countdown
+  var exam = new Date('2026-12-19T08:30:00+08:00');
+  var now = new Date();
+  var days = Math.max(0, Math.ceil((exam - now) / 86400000));
+  document.getElementById('cd-days').textContent = days;
+  document.getElementById('cd-weeks').textContent = Math.ceil(days / 7);
+  document.getElementById('cd-hours').textContent = Math.round(days * 3.2);
+
+  // Data
+  var zhentiData = [
+    {n:1, phase:'diagnose', label:'第1套（基础诊断）'},
+    {n:2, phase:'diagnose', label:'第2套（基础诊断）'},
+    {n:3, phase:'train', label:'第3套（限时训练）'},
+    {n:4, phase:'train', label:'第4套（限时训练）'},
+    {n:5, phase:'train', label:'第5套（限时训练）'},
+    {n:6, phase:'train', label:'第6套（限时训练）'},
+    {n:7, phase:'train', label:'第7套（限时训练）'},
+    {n:8, phase:'mock', label:'第8套（全真模考）'},
+    {n:9, phase:'mock', label:'第9套（全真模考）'},
+    {n:10, phase:'mock', label:'第10套（全真模考）'}
+  ];
+  var englishData = [
+    {n:1, phase:'diagnose', label:'第1套（精读词汇）'},
+    {n:2, phase:'diagnose', label:'第2套（精读词汇）'},
+    {n:3, phase:'train', label:'第3套（限时阅读）'},
+    {n:4, phase:'train', label:'第4套（限时阅读）'},
+    {n:5, phase:'train', label:'第5套（限时阅读）'},
+    {n:6, phase:'train', label:'第6套（限时阅读）'},
+    {n:7, phase:'train', label:'第7套（限时阅读）'},
+    {n:8, phase:'mock', label:'第8套（全真模考）'},
+    {n:9, phase:'mock', label:'第9套（全真模考）'},
+    {n:10, phase:'mock', label:'第10套（全真模考）'}
+  ];
+
+  var tagMap = {diagnose: ['诊断','tag-diagnose'], train: ['强化','tag-train'], mock: ['冲刺','tag-mock']};
+
+  // Load state
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem('kaoyan-progress') || '{}'); } catch(e) {}
+  if (!state.zhenti) state.zhenti = {};
+  if (!state.english) state.english = {};
+
+  function buildList(container, data, type) {
+    var el = document.getElementById(container);
+    data.forEach(function(item) {
+      var checked = state[type][item.n] ? true : false;
+      var div = document.createElement('div');
+      div.className = 'check-item' + (checked ? ' checked' : '');
+      div.setAttribute('data-n', item.n);
+      div.setAttribute('data-type', type);
+      var tag = tagMap[item.phase];
+      div.innerHTML =
+        '<div class="check-box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="4 12 10 18 20 6"/></svg></div>' +
+        '<span class="check-label">' + item.label + '</span>' +
+        '<span class="check-tag ' + tag[1] + '">' + tag[0] + '</span>';
+      div.addEventListener('click', function() { toggleItem(this, type, item.n); });
+      el.appendChild(div);
+    });
+    updateProgress(type);
+  }
+
+  function toggleItem(el, type, n) {
+    var checked = el.classList.toggle('checked');
+    state[type][n] = checked;
+    localStorage.setItem('kaoyan-progress', JSON.stringify(state));
+    updateProgress(type);
+  }
+
+  function updateProgress(type) {
+    var total = 10, count = 0;
+    for (var i = 1; i <= 10; i++) { if (state[type][i]) count++; }
+    var pct = Math.round((count / total) * 100);
+    document.getElementById(type + '-bar').style.width = pct + '%';
+    document.getElementById(type + '-text').textContent = count + ' / ' + total + ' 已完成';
+  }
+
+  buildList('zhenti-list', zhentiData, 'zhenti');
+  buildList('english-list', englishData, 'english');
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      this.classList.add('active');
+      document.getElementById('tab-' + this.getAttribute('data-tab')).classList.add('active');
+    });
+  });
+
+  // Reset
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    if (confirm('确定要重置所有进度吗？')) {
+      state = {zhenti: {}, english: {}};
+      localStorage.setItem('kaoyan-progress', JSON.stringify(state));
+      location.reload();
+    }
+  });
+
+  // Motivation rotation
+  var quotes = [
+    '坚持就是胜利，上岸在即！',
+    '每一天的努力都不会被辜负',
+    '你已经走了很远，不要在这里放弃',
+    '星光不负赶路人',
+    '最后的冲刺，最大的突破',
+    '今日多一分，明日少求人',
+    '越努力，越幸运'
+  ];
+  var qi = 0;
+  var motEl = document.getElementById('motivation');
+  setInterval(function() {
+    qi = (qi + 1) % quotes.length;
+    motEl.style.opacity = '0';
+    setTimeout(function() { motEl.textContent = quotes[qi]; motEl.style.opacity = '1'; }, 300);
+  }, 6000);
+  motEl.style.transition = 'opacity 0.3s';
+})();
+</script>
+</body>
+</html>
