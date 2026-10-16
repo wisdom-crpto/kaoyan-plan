@@ -231,3 +231,73 @@ export const ERROR_REASONS = [
   { id: 'blind', name: '知识盲区' },
   { id: 'method', name: '方法不对' }
 ];
+
+// GitHub sync
+const GITHUB_REPO = 'wisdom-crpto/kaoyan-plan';
+const GITHUB_BRANCH = 'main';
+const ERRORS_PATH = 'data/errors.json';
+
+export const github = {
+  getToken() {
+    return localStorage.getItem('gh_token') || '';
+  },
+
+  setToken(token) {
+    localStorage.setItem('gh_token', token);
+  },
+
+  hasToken() {
+    return !!this.getToken();
+  },
+
+  async fetchErrors() {
+    try {
+      const resp = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${ERRORS_PATH}`);
+      if (!resp.ok) return null;
+      return await resp.json();
+    } catch {
+      return null;
+    }
+  },
+
+  async pushErrors(errors) {
+    const token = this.getToken();
+    if (!token) throw new Error('未设置 GitHub Token');
+
+    // Get current file SHA (needed for update)
+    let sha = null;
+    try {
+      const metaResp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${ERRORS_PATH}?ref=${GITHUB_BRANCH}`, {
+        headers: { 'Authorization': `token ${token}` }
+      });
+      if (metaResp.ok) {
+        const meta = await metaResp.json();
+        sha = meta.sha;
+      }
+    } catch {}
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(errors, null, 2))));
+
+    const body = {
+      message: 'sync: update error book',
+      content,
+      branch: GITHUB_BRANCH
+    };
+    if (sha) body.sha = sha;
+
+    const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${ERRORS_PATH}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.message || 'Push failed');
+    }
+    return true;
+  }
+};

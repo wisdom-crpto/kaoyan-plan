@@ -1,5 +1,5 @@
 // error-book.js - 错题集模块
-import { db, compressImage, uid, formatDate, SUBJECTS, ERROR_REASONS } from './utils.js';
+import { db, compressImage, uid, formatDate, SUBJECTS, ERROR_REASONS, github } from './utils.js';
 
 const STORAGE_KEY = 'errors';
 
@@ -27,6 +27,11 @@ export function initErrorBook(container) {
     }
 
     let html = `
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn btn-ghost" id="sync-pull" style="font-size:12px;padding:6px 12px;border:1px solid var(--border);flex:1">从 GitHub 拉取</button>
+        <button class="btn btn-ghost" id="sync-push" style="font-size:12px;padding:6px 12px;border:1px solid var(--border);flex:1">推送到 GitHub</button>
+      </div>
+      <div id="sync-status" style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-bottom:8px"></div>
       <div class="filter-tabs">
         <button class="filter-tab ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">全部</button>
         ${SUBJECTS.map(s => `<button class="filter-tab ${currentFilter === s.id ? 'active' : ''}" data-filter="${s.id}">${s.name}</button>`).join('')}
@@ -143,6 +148,50 @@ export function initErrorBook(container) {
     container.querySelectorAll('.error-item').forEach(item => {
       item.onclick = () => showDetail(item.dataset.id);
     });
+
+    // Sync buttons
+    const pullBtn = document.getElementById('sync-pull');
+    const pushBtn = document.getElementById('sync-push');
+    const statusEl = document.getElementById('sync-status');
+
+    if (!github.hasToken()) {
+      if (statusEl) statusEl.textContent = '需先在"我的"页面设置 GitHub Token';
+    }
+
+    if (pullBtn) {
+      pullBtn.onclick = async () => {
+        if (!github.hasToken()) { alert('请先在"我的"页面设置 GitHub Token'); return; }
+        pullBtn.textContent = '拉取中...';
+        try {
+          const remote = await github.fetchErrors();
+          if (remote && Array.isArray(remote)) {
+            saveErrors(remote);
+            if (statusEl) statusEl.textContent = `已从 GitHub 拉取 ${remote.length} 条错题`;
+            render();
+          } else {
+            if (statusEl) statusEl.textContent = 'GitHub 上暂无错题数据';
+          }
+        } catch (e) {
+          if (statusEl) statusEl.textContent = '拉取失败：' + e.message;
+        }
+        pullBtn.textContent = '从 GitHub 拉取';
+      };
+    }
+
+    if (pushBtn) {
+      pushBtn.onclick = async () => {
+        if (!github.hasToken()) { alert('请先在"我的"页面设置 GitHub Token'); return; }
+        pushBtn.textContent = '推送中...';
+        try {
+          const errors = getErrors();
+          await github.pushErrors(errors);
+          if (statusEl) statusEl.textContent = `已推送 ${errors.length} 条错题到 GitHub`;
+        } catch (e) {
+          if (statusEl) statusEl.textContent = '推送失败：' + e.message;
+        }
+        pushBtn.textContent = '推送到 GitHub';
+      };
+    }
   }
 
   function showDetail(id) {
