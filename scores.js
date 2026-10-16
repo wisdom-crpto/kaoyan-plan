@@ -38,8 +38,8 @@ export function initScores(container) {
     // Stats
     const latest = scores[scores.length - 1];
     const first = scores[0];
-    const latestTotal = (latest.politics || 0) + (latest.english || 0) + (latest.prof1 || 0) + (latest.prof2 || 0);
-    const firstTotal = (first.politics || 0) + (first.english || 0) + (first.prof1 || 0) + (first.prof2 || 0);
+    const latestTotal = (latest.guanzzong || 0) + (latest.english || 0);
+    const firstTotal = (first.guanzzong || 0) + (first.english || 0);
     const improvement = latestTotal - firstTotal;
 
     // Chart data
@@ -71,7 +71,7 @@ export function initScores(container) {
           <canvas id="score-chart"></canvas>
         </div>
         <div class="filter-tabs" style="margin-top:8px">
-          ${SUBJECTS.map((s, i) => `<span style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${['#1d1d1f','#86868b','#34c759','#ff9500'][i]}"></span>${s.name}</span>`).join('')}
+          ${SUBJECTS.map((s, i) => `<span style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${['#1d1d1f','#86868b'][i]}"></span>${s.name}</span>`).join('')}
         </div>
       </div>
 
@@ -85,11 +85,11 @@ export function initScores(container) {
         <div class="card-title">历史记录</div>
         <div class="check-list">
           ${scores.slice().reverse().map((s, i) => {
-            const total = (s.politics || 0) + (s.english || 0) + (s.prof1 || 0) + (s.prof2 || 0);
+            const total = (s.guanzzong || 0) + (s.english || 0);
             return `
               <div class="check-item" style="cursor:default;flex-wrap:wrap">
                 <span class="check-text" style="font-weight:500">${s.date} · 总分 ${total}</span>
-                <span style="font-size:12px;color:var(--text-secondary)">政${s.politics || '-'} 英${s.english || '-'} 专一${s.prof1 || '-'} 专二${s.prof2 || '-'}</span>
+                <span style="font-size:12px;color:var(--text-secondary)">管综${s.guanzzong || '-'} 英语${s.english || '-'}</span>
               </div>
             `;
           }).join('')}
@@ -129,7 +129,8 @@ export function initScores(container) {
         ${SUBJECTS.map(s => `
           <div style="flex:1;min-width:calc(50% - 4px)">
             <label class="form-label">${s.name}</label>
-            <input class="score-input" id="score-${s.id}" type="number" min="0" max="150" placeholder="0" style="width:100%" />
+            <input class="score-input" id="score-${s.id}" type="number" min="0" max="${s.id === 'guanzzong' ? 200 : 100}" placeholder="0" style="width:100%" />
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;text-align:center">${s.id === 'guanzzong' ? '满分200' : '满分100'}</div>
           </div>
         `).join('')}
       </div>

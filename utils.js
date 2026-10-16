@@ -220,10 +220,8 @@ export function drawLineChart(canvas, datasets, options = {}) {
 
 // Subjects config
 export const SUBJECTS = [
-  { id: 'politics', name: '政治' },
-  { id: 'english', name: '英语' },
-  { id: 'prof1', name: '专业课一' },
-  { id: 'prof2', name: '专业课二' }
+  { id: 'guanzzong', name: '199管综' },
+  { id: 'english', name: '204英语' }
 ];
 
 // Error reasons
